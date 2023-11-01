@@ -1,0 +1,46 @@
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+# Представление данных для занятий (примеры: День, Погода, Транспорт)
+# 1 - Состоится занятие, 0 - Занятие не состоится
+lessons_data = [
+    ["Понедельник", "Солнечно", "Автобус", 1],
+    ["Вторник", "Пасмурно", "Автобус", 1],
+    ["Среда", "Дождь", "Такси", 1],
+    ["Четверг", "Солнечно", "Пешком", 1],
+    ["Пятница", "Солнечно", "Автобус", 1],
+    ["Суббота", "Пасмурно", "Автобус", 0],
+    ["Воскресенье", "Солнечно", "Пешком", 0],
+]
+
+# Разделение данных на признаки (X) и целевую переменную (y)
+X = [data[:3] for data in lessons_data]
+y = [data[3] for data in lessons_data]
+
+# Преобразование категориальных признаков в числовые
+from sklearn.preprocessing import LabelEncoder
+
+label_encoders = [LabelEncoder() for _ in range(3)]
+X_encoded = []
+
+for i in range(3):
+    X_encoded.append(label_encoders[i].fit_transform([data[i] for data in X]))
+
+X_encoded = list(zip(*X_encoded))
+
+# Разделение данных на обучающий и тестовый наборы
+X_train, X_test, y_train, y_test = train_test_split(X_encoded, y, test_size=0.2, random_state=42)
+
+# Создание AdaBoost классификатора
+adaboost_classifier = AdaBoostClassifier(n_estimators=50, random_state=42)
+
+# Обучение модели
+adaboost_classifier.fit(X_train, y_train)
+
+# Сделать предсказания на тестовом наборе
+y_pred = adaboost_classifier.predict(X_test)
+
+# Оценка качества модели
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Точность: {accuracy}")
